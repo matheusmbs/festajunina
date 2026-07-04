@@ -25,7 +25,7 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npx ng build --base-href /festa-junina-app/ --configuration production
+      - run: npx ng build --base-href /festajunina/ --configuration production
 
       - uses: actions/upload-pages-artifact@v3
         with:

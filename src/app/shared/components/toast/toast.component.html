@@ -1,0 +1,8 @@
+<div class="lista-toasts">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div class="toast" [class.erro]="toast.tipo === 'erro'" [class.sucesso]="toast.tipo === 'sucesso'">
+      <span>{{ toast.mensagem }}</span>
+      <button type="button" (click)="toastService.remover(toast.id)" aria-label="Fechar aviso">✕</button>
+    </div>
+  }
+</div>

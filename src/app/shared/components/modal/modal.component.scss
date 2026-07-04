@@ -1,0 +1,53 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.conteudo {
+  background: var(--cor-branco);
+  border-radius: var(--raio-borda);
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 0;
+
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--cor-marrom);
+  }
+}
+
+.fechar {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--cor-cinza);
+  line-height: 1;
+  padding: 4px;
+}
+
+.corpo {
+  padding: 16px 20px;
+}
+
+.rodape {
+  display: flex;
+  gap: 20px;
+  padding: 4px 20px 20px;
+  justify-content: flex-end;
+}

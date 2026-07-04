@@ -1,0 +1,80 @@
+<header class="cabecalho">
+  <button type="button" class="botao-voltar" (click)="voltar()">← Voltar</button>
+  <h1>📊 Relatório da Festa</h1>
+</header>
+
+<main class="corpo">
+  @if (carregando()) {
+    <app-loading texto="Carregando relatório..." />
+  } @else if (erro()) {
+    <div class="mensagem-erro">
+      <p>{{ erro() }}</p>
+      <button type="button" class="botao-tentar" (click)="carregarRelatorios()">Tentar novamente</button>
+    </div>
+  } @else {
+    <div class="acoes">
+      <button type="button" class="botao-exportar" (click)="exportarCsv()">⬇️ Exportar CSV</button>
+    </div>
+
+    <div class="abas">
+      <button type="button" class="aba" [class.ativa]="abaAtiva() === 'participante'" (click)="abaAtiva.set('participante')">
+        Por participante
+      </button>
+      <button type="button" class="aba" [class.ativa]="abaAtiva() === 'item'" (click)="abaAtiva.set('item')">
+        Por item
+      </button>
+    </div>
+
+    @if (abaAtiva() === 'participante') {
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Participante</th>
+            <th>Item escolhido</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (linha of porParticipante(); track linha.participante) {
+            <tr>
+              <td>{{ linha.participante }}</td>
+              <td>
+                @if (linha.item) {
+                  {{ linha.item }}
+                } @else {
+                  <span class="vazio">—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <div class="lista-por-categoria">
+        @for (secao of secoesPorCategoria(); track secao.categoria) {
+          <section class="secao-categoria">
+            <h2>
+              <span>{{ secao.titulo }}</span>
+              <span class="linha-tracejada"></span>
+            </h2>
+            <div class="lista-por-item">
+              @for (grupo of secao.itens; track grupo.item) {
+                <div class="grupo-item">
+                  <h3>{{ grupo.item }}</h3>
+                  @if (grupo.participantes.length > 0) {
+                    <ul>
+                      @for (participante of grupo.participantes; track participante) {
+                        <li>{{ participante }}</li>
+                      }
+                    </ul>
+                  } @else {
+                    <p class="vazio">Ninguém assumiu ainda</p>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    }
+  }
+</main>

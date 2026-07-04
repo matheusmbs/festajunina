@@ -1,0 +1,16 @@
+@if (visivel) {
+  <div class="overlay" (click)="onOverlayClick()">
+    <div class="conteudo" (click)="onConteudoClick($event)">
+      <div class="cabecalho">
+        <h2>{{ titulo }}</h2>
+        <button type="button" class="fechar" (click)="fechar.emit()" aria-label="Fechar">✕</button>
+      </div>
+      <div class="corpo">
+        <ng-content select="[modal-corpo]"></ng-content>
+      </div>
+      <div class="rodape">
+        <ng-content select="[modal-rodape]"></ng-content>
+      </div>
+    </div>
+  </div>
+}

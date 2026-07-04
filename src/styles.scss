@@ -1,0 +1,59 @@
+:root {
+  --cor-vermelho-escuro: #8b1a1a;
+  --cor-vermelho-escuro-hover: #6f1414;
+  --cor-verde: #2e7d32;
+  --cor-amarelo: #ffc107;
+  --cor-azul: #1565c0;
+  --cor-roxo: #6a1b9a;
+  --cor-laranja: #ff9800;
+  --cor-bege: #fff8e7;
+  --cor-marrom: #4e342e;
+  --cor-cinza: #757575;
+  --cor-cinza-claro: #e0e0e0;
+  --cor-branco: #ffffff;
+  --cor-badge-roxo-bg: #f3e5f5;
+  --cor-badge-roxo-texto: #6a1b9a;
+  --cor-badge-verde-bg: #e8f5e9;
+  --cor-badge-verde-texto: #2e7d32;
+  --fonte-base: 'Poppins', system-ui, -apple-system, sans-serif;
+  --raio-borda: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--fonte-base);
+  background: var(--cor-bege);
+  color: var(--cor-marrom);
+}
+
+// Barra decorativa xadrez amarelo-vermelho-verde (estilo bandeirinha junina).
+// Reaproveitada no header e no topo dos cards de item.
+.barra-xadrez {
+  height: 10px;
+  width: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--cor-amarelo) 0 8px,
+    var(--cor-vermelho-escuro) 8px 16px,
+    var(--cor-verde) 16px 24px
+  );
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+select {
+  font-family: inherit;
+}

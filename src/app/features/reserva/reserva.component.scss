@@ -1,0 +1,337 @@
+:host {
+  display: block;
+}
+
+.hero {
+  background: var(--cor-vermelho-escuro);
+  color: var(--cor-branco);
+  text-align: center;
+  padding: 32px 16px 0;
+
+  h1 {
+    margin: 0 0 12px;
+    font-size: 1.9rem;
+    font-weight: 800;
+  }
+
+  .subtitulo {
+    max-width: 560px;
+    margin: 0 auto 24px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .destaque {
+    color: var(--cor-amarelo);
+    font-weight: 700;
+  }
+}
+
+.bandeirinhas {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.bandeira {
+  width: 0;
+  height: 0;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-top: 16px solid;
+
+  &.verde {
+    border-top-color: var(--cor-verde);
+  }
+  &.amarelo {
+    border-top-color: var(--cor-amarelo);
+  }
+  &.azul {
+    border-top-color: var(--cor-azul);
+  }
+  &.roxo {
+    border-top-color: var(--cor-roxo);
+  }
+  &.vermelho {
+    border-top-color: #e53935;
+  }
+}
+
+.corpo {
+  background: var(--cor-bege);
+  padding: 24px 16px 48px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.mensagem-erro {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--cor-marrom);
+
+  .botao-tentar {
+    margin-top: 12px;
+    background: var(--cor-vermelho-escuro);
+    color: var(--cor-branco);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+  }
+}
+
+.cards-estatisticas {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+  }
+}
+
+.card-estatistica {
+  flex: 1;
+  background: var(--cor-branco);
+  border: 2px solid var(--cor-amarelo);
+  border-radius: var(--raio-borda);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  .emoji {
+    font-size: 1.8rem;
+  }
+
+  .numero {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--cor-vermelho-escuro);
+  }
+
+  .rotulo {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--cor-cinza);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+}
+
+.selecao-participante {
+  background: var(--cor-branco);
+  border-radius: var(--raio-borda);
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-weight: 700;
+    color: var(--cor-marrom);
+  }
+
+  select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--cor-cinza-claro);
+    font-size: 0.95rem;
+  }
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.filtro {
+  border: 2px solid var(--cor-vermelho-escuro);
+  background: transparent;
+  color: var(--cor-vermelho-escuro);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 0.85rem;
+
+  &.ativo {
+    background: var(--cor-vermelho-escuro);
+    color: var(--cor-branco);
+  }
+}
+
+.secao-categoria {
+  margin-bottom: 28px;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--cor-marrom);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 14px;
+  }
+
+  .linha-tracejada {
+    flex: 1;
+    border-top: 2px dashed var(--cor-vermelho-escuro);
+  }
+}
+
+.lista-itens {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-item {
+  background: var(--cor-branco);
+  border-radius: var(--raio-borda);
+  border-left: 4px solid var(--cor-verde);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.conteudo-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+
+  @media (max-width: 560px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.info-item {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+
+  .icone {
+    font-size: 1.6rem;
+  }
+}
+
+.linha-nome {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  strong {
+    color: var(--cor-marrom);
+    font-size: 1rem;
+  }
+}
+
+.badge-pessoas {
+  background: var(--cor-badge-roxo-bg);
+  color: var(--cor-badge-roxo-texto);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.observacao {
+  margin: 4px 0 0;
+  color: var(--cor-cinza);
+  font-size: 0.85rem;
+}
+
+.item-ja-reservado {
+  background: var(--cor-bege);
+  border-left: 4px solid var(--cor-verde);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 10px 0;
+
+  strong {
+    color: var(--cor-marrom);
+    font-size: 1.05rem;
+  }
+}
+
+.botao-assumir {
+  background: var(--cor-vermelho-escuro);
+  color: var(--cor-branco);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    background: var(--cor-vermelho-escuro-hover);
+  }
+}
+
+.aviso {
+  color: var(--cor-cinza);
+  font-size: 0.85rem;
+}
+
+.botao-primario {
+  background: var(--cor-vermelho-escuro);
+  color: var(--cor-branco);
+  border: 2px solid var(--cor-vermelho-escuro);
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-weight: 700;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+
+  &:not(:disabled):hover {
+    background: var(--cor-vermelho-escuro-hover);
+    border-color: var(--cor-vermelho-escuro-hover);
+  }
+
+  &:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.botao-secundario {
+  background: transparent;
+  color: var(--cor-vermelho-escuro);
+  border: 2px solid var(--cor-vermelho-escuro);
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-weight: 700;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+
+  &:hover {
+    background: #fdf0ee;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--cor-cinza-claro);
+  font-size: 0.95rem;
+}

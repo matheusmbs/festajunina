@@ -43,6 +43,9 @@ export class ReservaComponent implements OnInit {
   protected readonly mostrarModalReserva = signal(false);
   protected readonly confirmando = signal(false);
 
+  protected readonly itemConfirmado = signal<{ nome: string; observacao: string | null } | null>(null);
+  protected readonly mostrarModalSucesso = signal(false);
+
   // As categorias não são fixas: vêm do valor livre de `itens.categoria` no banco.
   protected readonly categorias = computed(() => {
     const presentes = new Set(this.itens().map((item) => item.categoria));
@@ -164,6 +167,11 @@ export class ReservaComponent implements OnInit {
     this.itemSelecionado.set(null);
   }
 
+  protected fecharModalSucesso(): void {
+    this.mostrarModalSucesso.set(false);
+    this.itemConfirmado.set(null);
+  }
+
   protected async confirmarReserva(): Promise<void> {
     const item = this.itemSelecionado();
     const participanteId = this.participanteParaReserva();
@@ -174,11 +182,11 @@ export class ReservaComponent implements OnInit {
     this.confirmando.set(true);
     try {
       await this.supabase.reservar(item.id, participanteId);
-      const participante = this.todosParticipantes().find((p) => p.id === participanteId);
-      this.toast.sucesso(`✅ ${participante?.nome ?? 'Você'} vai levar ${item.nome}!`);
       if (participanteId === this.participanteSelecionadoId()) {
         this.itemJaReservado.set(item.nome);
       }
+      this.itemConfirmado.set({ nome: item.nome, observacao: item.observacao });
+      this.mostrarModalSucesso.set(true);
       this.fecharModalReserva();
     } catch (erro) {
       const mensagem = erro instanceof Error ? erro.message : '';

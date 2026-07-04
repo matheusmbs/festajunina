@@ -151,3 +151,16 @@
     {{ confirmando() ? 'Confirmando...' : 'Confirmar' }}
   </button>
 </app-modal>
+
+<app-modal [visivel]="mostrarModalSucesso()" titulo="🎉 Parabéns!" (fechar)="fecharModalSucesso()">
+  <div modal-corpo>
+    <p>Você selecionou o item:</p>
+    <div class="item-ja-reservado">
+      <strong>{{ itemConfirmado()?.nome }}</strong>
+      @if (itemConfirmado()?.observacao) {
+        <p class="observacao">{{ itemConfirmado()?.observacao }}</p>
+      }
+    </div>
+  </div>
+  <button modal-rodape type="button" class="botao-primario" (click)="fecharModalSucesso()">Entendi</button>
+</app-modal>

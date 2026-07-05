@@ -32,17 +32,23 @@ O app chama as seguintes funções via `supabase.rpc(...)` (ver [`supabase.servi
 
 | Função | Parâmetros | Retorno |
 |---|---|---|
-| `listar_itens_disponiveis()` | — | `{ id, nome, categoria, estoque, observacao }[]` |
+| `listar_itens_disponiveis()` | — | `{ id, nome, categoria, quantidade_pessoas, observacao }[]` |
 | `listar_participantes_disponiveis()` | — | `{ id, nome }[]` (quem ainda não reservou) |
 | `listar_todos_participantes()` | — | `{ id, nome }[]` (todos) |
-| `reservar(p_item, p_participante)` | bigint, bigint | bigint (id da reserva) |
-| `reserva_do_participante(p_participante)` | bigint | `{ item }` ou vazio |
+| `reservar(p_item, p_participantes)` | bigint, bigint[] | void |
+| `reserva_do_participante(p_participante)` | bigint | `{ item, observacao }` ou vazio |
 | `relatorio_por_participante()` | — | `{ participante, item }[]` |
 | `relatorio_por_item()` | — | `{ item, categoria, participante }[]` |
 
-O SQL de `listar_todos_participantes`, `reserva_do_participante`, `relatorio_por_participante` e `relatorio_por_item` está comentado no topo de `supabase.service.ts`, pronto para rodar no SQL Editor do Supabase.
+Todo o SQL (incluindo a migração de `estoque` para `quantidade_pessoas`) está comentado no topo de `supabase.service.ts`, pronto para rodar no SQL Editor do Supabase.
 
-`listar_itens_disponiveis`, `listar_participantes_disponiveis` e `reservar` dependem do seu schema de `itens`/`participantes`/`reservas` (estoque disponível, chave única por participante etc.) e devem ser criadas de acordo com ele. A função `reservar` deve levantar uma exceção com a mensagem `Item esgotado` quando o estoque tiver acabado, e `Este participante ja reservou um item` quando o participante já tiver uma reserva — o app trata essas duas mensagens especificamente para exibir o aviso correto.
+### Modelo de reserva: grupo fechado por item
+
+Cada item não tem mais estoque avulso — ele define `quantidade_pessoas`, o tamanho exato do grupo que precisa assumi-lo junto (ex.: um item de "Hot dog" com `quantidade_pessoas = 3` só é assumido quando 3 pessoas são selecionadas de uma vez). A reserva é tudo-ou-nada: `reservar(p_item, p_participantes)` recebe um array com exatamente `quantidade_pessoas` ids e insere uma linha em `reservas` para cada participante numa única chamada; se qualquer um deles já tiver uma reserva, a função inteira falha (nada é salvo). Um item deixa de aparecer em `listar_itens_disponiveis()` assim que qualquer linha existir em `reservas` para ele — não existe reserva parcial.
+
+A função `reservar` levanta uma exceção com a mensagem `Item esgotado` quando o item já foi assumido por outro grupo, e `Este participante ja reservou um item` quando algum dos participantes selecionados já tem reserva — o app trata essas duas mensagens especificamente para exibir o aviso correto.
+
+Não existe mais um seletor fixo de "seu nome" na tela principal — o app não sabe quem é o usuário do dispositivo. Em vez disso, um botão "🔍 Já escolhi algo?" abre um modal onde a pessoa escolhe o próprio nome só para consultar (via `reserva_do_participante`) se já está em algum grupo, sem travar os botões "Assumir" da tela.
 
 `item.categoria` é texto livre — o app não assume valores fixos. Os botões de filtro, os títulos de seção e o emoji de cada item são gerados dinamicamente a partir dos valores distintos encontrados em `listar_itens_disponiveis()` (ver [`categoria.util.ts`](src/app/shared/utils/categoria.util.ts)). O emoji é escolhido por palavra-chave (`salg`, `doc`/`sobremesa`, `beb`, `apoio`, `prato`), com 🎪 como fallback para categorias não reconhecidas.
 

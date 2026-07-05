@@ -24,7 +24,7 @@
     <section class="cards-estatisticas">
       <div class="card-estatistica">
         <span class="emoji">📋</span>
-        <span class="numero">{{ estatisticas().vagasTotais }}</span>
+        <span class="numero">{{ estatisticas().itensLivres }}</span>
         <span class="rotulo">Itens Livres</span>
       </div>
       <div class="card-estatistica">
@@ -39,88 +39,66 @@
       </div>
     </section>
 
-    <section class="selecao-participante">
-      <label for="participante">Primeiro, selecione seu nome:</label>
-      <select
-        id="participante"
-        [ngModel]="participanteSelecionadoId()"
-        (ngModelChange)="onSelecionarParticipante($event)"
-      >
-        <option [ngValue]="null">Selecione...</option>
-        @for (participante of todosParticipantes(); track participante.id) {
-          <option [ngValue]="participante.id">{{ participante.nome }}</option>
+    <section class="acao-verificar">
+      <button type="button" class="botao-secundario" (click)="abrirModalVerificar()">
+        🔍 Já escolhi algo?
+      </button>
+      <button type="button" class="botao-secundario" (click)="irParaRelatorio()">
+        📊 Relatório
+      </button>
+    </section>
+
+    @if (itens().length === 0) {
+      <p class="mensagem-tudo-assumido">Todos os itens foram assumidos</p>
+    } @else {
+      <section class="filtros">
+        @for (filtro of filtros(); track filtro.chave) {
+          <button
+            type="button"
+            class="filtro"
+            [class.ativo]="filtroAtivo() === filtro.chave"
+            (click)="filtroAtivo.set(filtro.chave)"
+          >
+            {{ filtro.emoji }} {{ filtro.rotulo }}
+          </button>
         }
-      </select>
-    </section>
-
-    <section class="filtros">
-      @for (filtro of filtros(); track filtro.chave) {
-        <button
-          type="button"
-          class="filtro"
-          [class.ativo]="filtroAtivo() === filtro.chave"
-          (click)="filtroAtivo.set(filtro.chave)"
-        >
-          {{ filtro.emoji }} {{ filtro.rotulo }}
-        </button>
-      }
-    </section>
-
-    @for (categoria of categoriasComItens(); track categoria) {
-      <section class="secao-categoria">
-        <h2>
-          <span>{{ tituloSecao(categoria) }}</span>
-          <span class="linha-tracejada"></span>
-        </h2>
-
-        <div class="lista-itens">
-          @for (item of itensDaCategoria(categoria); track item.id) {
-            <article class="card-item">
-              <div class="barra-xadrez"></div>
-              <div class="conteudo-card">
-                <div class="info-item">
-                  <span class="icone">{{ emojiCategoria(item.categoria) }}</span>
-                  <div class="detalhes">
-                    <div class="linha-nome">
-                      <strong>{{ item.nome }}</strong>
-                      <span class="badge-pessoas">👥 {{ rotuloEstoque(item.estoque) }}</span>
-                      <app-badge-status [disponivel]="item.estoque > 0" />
-                    </div>
-                    @if (item.observacao) {
-                      <p class="observacao">{{ item.observacao }}</p>
-                    }
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  class="botao-assumir"
-                  [disabled]="jaReservou() || item.estoque === 0"
-                  (click)="abrirModalReserva(item)"
-                >
-                  🎪 Assumir
-                </button>
-              </div>
-            </article>
-          }
-        </div>
       </section>
+
+      @for (categoria of categoriasComItens(); track categoria) {
+        <section class="secao-categoria">
+          <h2>
+            <span>{{ tituloSecao(categoria) }}</span>
+            <span class="linha-tracejada"></span>
+          </h2>
+
+          <div class="lista-itens">
+            @for (item of itensDaCategoria(categoria); track item.id) {
+              <article class="card-item">
+                <div class="barra-xadrez"></div>
+                <div class="conteudo-card">
+                  <div class="info-item">
+                    <span class="icone">{{ emojiCategoria(item.categoria) }}</span>
+                    <div class="detalhes">
+                      <div class="linha-nome">
+                        <strong>{{ item.nome }}</strong>
+                        <span class="badge-pessoas">👥 {{ rotuloGrupo(item.quantidade_pessoas) }}</span>
+                        <app-badge-status [disponivel]="true" />
+                      </div>
+                      @if (item.observacao) {
+                        <p class="observacao">{{ item.observacao }}</p>
+                      }
+                    </div>
+                  </div>
+                  <button type="button" class="botao-assumir" (click)="abrirModalReserva(item)">🎪 Assumir</button>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
     }
   }
 </main>
-
-<app-modal [visivel]="mostrarModalJaEscolheu()" titulo="🎉 Você já escolheu!" (fechar)="fecharModalJaEscolheu()">
-  <div modal-corpo>
-    <p>Você já está responsável pelo item abaixo:</p>
-    <div class="item-ja-reservado">
-      <strong>{{ itemJaReservadoDetalhe()?.nome }}</strong>
-      @if (itemJaReservadoDetalhe()?.observacao) {
-        <p class="observacao">{{ itemJaReservadoDetalhe()?.observacao }}</p>
-      }
-    </div>
-    <p class="aviso">Cada pessoa só pode selecionar um item da lista</p>
-  </div>
-  <button modal-rodape type="button" class="botao-primario" (click)="fecharModalJaEscolheu()">Entendi</button>
-</app-modal>
 
 <app-modal
   [visivel]="mostrarModalReserva()"
@@ -128,24 +106,27 @@
   (fechar)="fecharModalReserva()"
 >
   <div modal-corpo>
-    <label for="participante-reserva">Confirmar reserva para:</label>
-    <select
-      id="participante-reserva"
-      [ngModel]="participanteParaReserva()"
-      (ngModelChange)="participanteParaReserva.set($event)"
-    >
-      <option [ngValue]="null">Selecione seu nome...</option>
-      @for (participante of participantesDisponiveis(); track participante.id) {
-        <option [ngValue]="participante.id">{{ participante.nome }}</option>
-      }
-    </select>
+    <p>Este item precisa de {{ rotuloGrupo(itemSelecionado()?.quantidade_pessoas ?? 0) }}. Selecione quem vai levar:</p>
+    @for (participanteId of participantesGrupo(); track $index) {
+      <label [attr.for]="'participante-grupo-' + $index">Pessoa {{ $index + 1 }}:</label>
+      <select
+        [id]="'participante-grupo-' + $index"
+        [ngModel]="participanteId"
+        (ngModelChange)="selecionarParticipanteDoGrupo($index, $event)"
+      >
+        <option [ngValue]="null">Selecione o nome...</option>
+        @for (participante of opcoesParaSlot($index); track participante.id) {
+          <option [ngValue]="participante.id">{{ participante.nome }}</option>
+        }
+      </select>
+    }
   </div>
   <button modal-rodape type="button" class="botao-secundario" (click)="fecharModalReserva()">Cancelar</button>
   <button
     modal-rodape
     type="button"
     class="botao-primario"
-    [disabled]="!participanteParaReserva() || confirmando()"
+    [disabled]="!grupoCompleto() || confirmando()"
     (click)="confirmarReserva()"
   >
     {{ confirmando() ? 'Confirmando...' : 'Confirmar' }}
@@ -163,4 +144,40 @@
     </div>
   </div>
   <button modal-rodape type="button" class="botao-primario" (click)="fecharModalSucesso()">Entendi</button>
+</app-modal>
+
+<app-modal [visivel]="mostrarModalVerificar()" titulo="🔍 Já escolhi algo?" (fechar)="fecharModalVerificar()">
+  <div modal-corpo>
+    <label for="participante-verificar">Selecione seu nome:</label>
+    <select
+      id="participante-verificar"
+      [ngModel]="participanteVerificacaoId()"
+      (ngModelChange)="onSelecionarParticipanteVerificacao($event)"
+    >
+      <option [ngValue]="null">Selecione...</option>
+      @for (participante of todosParticipantes(); track participante.id) {
+        <option [ngValue]="participante.id">{{ participante.nome }}</option>
+      }
+    </select>
+
+    @if (verificando()) {
+      <app-loading texto="Verificando..." />
+    } @else if (jaVerificou()) {
+      @if (itemVerificado()) {
+        <p>Você já está responsável pelo item abaixo:</p>
+        <div class="item-ja-reservado">
+          <strong>{{ itemVerificado()?.nome }}</strong>
+          @if (itemVerificado()?.observacao) {
+            <p class="observacao">{{ itemVerificado()?.observacao }}</p>
+          }
+          @if ((itemVerificado()?.participantes)!.length > 1) {
+            <p class="grupo-pessoas">👥 Grupo: {{ (itemVerificado()?.participantes)!.join(', ') }}</p>
+          }
+        </div>
+      } @else {
+        <p class="aviso">Você ainda não escolheu nenhum item.</p>
+      }
+    }
+  </div>
+  <button modal-rodape type="button" class="botao-primario" (click)="fecharModalVerificar()">Fechar</button>
 </app-modal>

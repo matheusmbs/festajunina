@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Item } from '../../core/models/item.model';
 import { Participante } from '../../core/models/participante.model';
 import { SupabaseService } from '../../core/services/supabase.service';
@@ -15,6 +16,15 @@ interface FiltroCategoria {
   emoji: string;
 }
 
+interface ItemDetalhe {
+  nome: string;
+  observacao: string | null;
+}
+
+interface ItemVerificado extends ItemDetalhe {
+  participantes: string[];
+}
+
 @Component({
   selector: 'app-reserva',
   standalone: true,
@@ -25,6 +35,7 @@ interface FiltroCategoria {
 export class ReservaComponent implements OnInit {
   private readonly supabase = inject(SupabaseService);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
 
   protected readonly itens = signal<Item[]>([]);
   protected readonly todosParticipantes = signal<Participante[]>([]);
@@ -32,19 +43,26 @@ export class ReservaComponent implements OnInit {
   protected readonly carregando = signal(true);
   protected readonly erro = signal<string | null>(null);
 
-  protected readonly participanteSelecionadoId = signal<number | null>(null);
-  protected readonly itemJaReservado = signal<string | null>(null);
-  protected readonly mostrarModalJaEscolheu = signal(false);
-
   protected readonly filtroAtivo = signal<string>('todos');
 
+  // Modal "Assumir": um grupo fechado de N pessoas para o item selecionado.
   protected readonly itemSelecionado = signal<Item | null>(null);
-  protected readonly participanteParaReserva = signal<number | null>(null);
   protected readonly mostrarModalReserva = signal(false);
+  protected readonly participantesGrupo = signal<(number | null)[]>([]);
   protected readonly confirmando = signal(false);
 
-  protected readonly itemConfirmado = signal<{ nome: string; observacao: string | null } | null>(null);
+  protected readonly grupoCompleto = computed(() => this.participantesGrupo().every((id) => id !== null));
+
+  // Modal de sucesso após confirmar a reserva do grupo.
+  protected readonly itemConfirmado = signal<ItemDetalhe | null>(null);
   protected readonly mostrarModalSucesso = signal(false);
+
+  // Modal "Já escolhi algo?": consulta pontual, sem gate na tela principal.
+  protected readonly mostrarModalVerificar = signal(false);
+  protected readonly participanteVerificacaoId = signal<number | null>(null);
+  protected readonly itemVerificado = signal<ItemVerificado | null>(null);
+  protected readonly jaVerificou = signal(false);
+  protected readonly verificando = signal(false);
 
   // As categorias não são fixas: vêm do valor livre de `itens.categoria` no banco.
   protected readonly categorias = computed(() => {
@@ -61,24 +79,11 @@ export class ReservaComponent implements OnInit {
     })),
   ]);
 
-  protected readonly jaReservou = computed(
-    () => this.participanteSelecionadoId() !== null && this.itemJaReservado() !== null,
-  );
-
-  protected readonly itemJaReservadoDetalhe = computed(() => {
-    const nome = this.itemJaReservado();
-    if (!nome) {
-      return null;
-    }
-    const item = this.itens().find((i) => i.nome === nome);
-    return { nome, observacao: item?.observacao ?? null };
-  });
-
   protected readonly estatisticas = computed(() => {
-    const vagasTotais = this.itens().reduce((soma, item) => soma + item.estoque, 0);
+    const itensLivres = this.itens().length;
     const livres = this.participantesDisponiveis().length;
     const assumidos = this.todosParticipantes().length - livres;
-    return { vagasTotais, assumidos, livres };
+    return { itensLivres, assumidos, livres };
   });
 
   protected readonly itensFiltrados = computed(() => {
@@ -107,8 +112,12 @@ export class ReservaComponent implements OnInit {
     return emojiDaCategoria(categoria);
   }
 
-  protected rotuloEstoque(estoque: number): string {
-    return estoque === 1 ? 'Falta 1' : `Faltam ${estoque}`;
+  protected rotuloGrupo(quantidadePessoas: number): string {
+    return quantidadePessoas === 1 ? '1 pessoa' : `${quantidadePessoas} pessoas`;
+  }
+
+  protected irParaRelatorio(): void {
+    this.router.navigateByUrl('/relatorio');
   }
 
   protected async carregarDados(): Promise<void> {
@@ -130,68 +139,54 @@ export class ReservaComponent implements OnInit {
     }
   }
 
-  protected async onSelecionarParticipante(participanteId: number | null): Promise<void> {
-    this.participanteSelecionadoId.set(participanteId);
-    this.itemJaReservado.set(null);
-
-    if (participanteId === null) {
-      return;
-    }
-
-    try {
-      const reserva = await this.supabase.reservaDoParticipante(participanteId);
-      if (reserva) {
-        this.itemJaReservado.set(reserva.item);
-        this.mostrarModalJaEscolheu.set(true);
-      }
-    } catch {
-      this.toast.erro('Não foi possível verificar sua reserva. Tente novamente.');
-    }
-  }
-
-  protected fecharModalJaEscolheu(): void {
-    this.mostrarModalJaEscolheu.set(false);
-  }
+  // --- Modal "Assumir" (grupo de N pessoas) ---
 
   protected abrirModalReserva(item: Item): void {
-    if (this.jaReservou()) {
-      return;
-    }
     this.itemSelecionado.set(item);
-    this.participanteParaReserva.set(this.participanteSelecionadoId());
+    this.participantesGrupo.set(new Array(item.quantidade_pessoas).fill(null));
     this.mostrarModalReserva.set(true);
   }
 
   protected fecharModalReserva(): void {
     this.mostrarModalReserva.set(false);
     this.itemSelecionado.set(null);
+    this.participantesGrupo.set([]);
   }
 
-  protected fecharModalSucesso(): void {
-    this.mostrarModalSucesso.set(false);
-    this.itemConfirmado.set(null);
+  protected selecionarParticipanteDoGrupo(indice: number, participanteId: number | null): void {
+    this.participantesGrupo.update((atual) => {
+      const copia = [...atual];
+      copia[indice] = participanteId;
+      return copia;
+    });
+  }
+
+  protected opcoesParaSlot(indice: number): Participante[] {
+    const escolhidosEmOutrosSlots = new Set(
+      this.participantesGrupo()
+        .filter((_, i) => i !== indice)
+        .filter((id): id is number => id !== null),
+    );
+    return this.participantesDisponiveis().filter((p) => !escolhidosEmOutrosSlots.has(p.id));
   }
 
   protected async confirmarReserva(): Promise<void> {
     const item = this.itemSelecionado();
-    const participanteId = this.participanteParaReserva();
-    if (!item || !participanteId) {
+    const participantes = this.participantesGrupo();
+    if (!item || !this.grupoCompleto()) {
       return;
     }
 
     this.confirmando.set(true);
     try {
-      await this.supabase.reservar(item.id, participanteId);
-      if (participanteId === this.participanteSelecionadoId()) {
-        this.itemJaReservado.set(item.nome);
-      }
+      await this.supabase.reservar(item.id, participantes as number[]);
       this.itemConfirmado.set({ nome: item.nome, observacao: item.observacao });
       this.mostrarModalSucesso.set(true);
       this.fecharModalReserva();
     } catch (erro) {
       const mensagem = erro instanceof Error ? erro.message : '';
       if (mensagem.includes('esgotado')) {
-        this.toast.erro('😅 Este item acabou de ser reservado por outra pessoa! Escolha outro.');
+        this.toast.erro('😅 Este item acabou de ser reservado por outro grupo! Escolha outro.');
       } else if (mensagem.toLowerCase().includes('ja reservou') || mensagem.toLowerCase().includes('já reservou')) {
         this.toast.erro(mensagem);
       } else {
@@ -200,6 +195,49 @@ export class ReservaComponent implements OnInit {
     } finally {
       this.confirmando.set(false);
       await this.carregarDados();
+    }
+  }
+
+  protected fecharModalSucesso(): void {
+    this.mostrarModalSucesso.set(false);
+    this.itemConfirmado.set(null);
+  }
+
+  // --- Modal "Já escolhi algo?" ---
+
+  protected abrirModalVerificar(): void {
+    this.mostrarModalVerificar.set(true);
+  }
+
+  protected fecharModalVerificar(): void {
+    this.mostrarModalVerificar.set(false);
+    this.participanteVerificacaoId.set(null);
+    this.itemVerificado.set(null);
+    this.jaVerificou.set(false);
+  }
+
+  protected async onSelecionarParticipanteVerificacao(participanteId: number | null): Promise<void> {
+    this.participanteVerificacaoId.set(participanteId);
+    this.itemVerificado.set(null);
+    this.jaVerificou.set(false);
+
+    if (participanteId === null) {
+      return;
+    }
+
+    this.verificando.set(true);
+    try {
+      const reserva = await this.supabase.reservaDoParticipante(participanteId);
+      this.itemVerificado.set(
+        reserva
+          ? { nome: reserva.item, observacao: reserva.observacao, participantes: reserva.participantes }
+          : null,
+      );
+      this.jaVerificou.set(true);
+    } catch {
+      this.toast.erro('Não foi possível verificar sua reserva. Tente novamente.');
+    } finally {
+      this.verificando.set(false);
     }
   }
 }

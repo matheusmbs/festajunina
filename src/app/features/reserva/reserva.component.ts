@@ -186,7 +186,8 @@ export class ReservaComponent implements OnInit {
     } catch (erro) {
       const mensagem = erro instanceof Error ? erro.message : '';
       if (mensagem.includes('esgotado')) {
-        this.toast.erro('😅 Este item acabou de ser reservado por outro grupo! Escolha outro.');
+        this.toast.erro('😅 Esse item já foi escolhido por outra pessoa. Escolha outro.');
+        this.fecharModalReserva();
       } else if (mensagem.toLowerCase().includes('ja reservou') || mensagem.toLowerCase().includes('já reservou')) {
         this.toast.erro(mensagem);
       } else {

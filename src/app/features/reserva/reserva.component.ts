@@ -184,7 +184,7 @@ export class ReservaComponent implements OnInit {
       this.mostrarModalSucesso.set(true);
       this.fecharModalReserva();
     } catch (erro) {
-      const mensagem = erro instanceof Error ? erro.message : '';
+      const mensagem = this.extrairMensagemErro(erro);
       if (mensagem.includes('esgotado')) {
         this.toast.erro('😅 Esse item já foi escolhido por outra pessoa. Escolha outro.');
         this.fecharModalReserva();
@@ -202,6 +202,18 @@ export class ReservaComponent implements OnInit {
   protected fecharModalSucesso(): void {
     this.mostrarModalSucesso.set(false);
     this.itemConfirmado.set(null);
+  }
+
+  // O erro do Supabase (PostgrestError) é um objeto plano com `.message`,
+  // não uma instância de Error — por isso não dá pra usar só `instanceof Error`.
+  private extrairMensagemErro(erro: unknown): string {
+    if (erro instanceof Error) {
+      return erro.message;
+    }
+    if (typeof erro === 'object' && erro !== null && 'message' in erro) {
+      return String((erro as { message: unknown }).message);
+    }
+    return '';
   }
 
   // --- Modal "Já escolhi algo?" ---

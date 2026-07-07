@@ -9,6 +9,7 @@ import { LoadingComponent } from '../../shared/components/loading/loading.compon
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { emojiDaCategoria, rotuloCategoria } from '../../shared/utils/categoria.util';
+import { formatarObservacao } from '../../shared/utils/observacao.util';
 
 interface FiltroCategoria {
   chave: string;
@@ -117,6 +118,10 @@ export class ReservaComponent implements OnInit {
 
   protected rotuloGrupo(quantidadePessoas: number): string {
     return quantidadePessoas === 1 ? '1 pessoa' : `${quantidadePessoas} pessoas`;
+  }
+
+  protected formatarObservacao(observacao: string) {
+    return formatarObservacao(observacao);
   }
 
   protected irParaRelatorio(): void {

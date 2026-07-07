@@ -5,6 +5,9 @@ const EMOJI_POR_PALAVRA_CHAVE: [string, string][] = [
   ['beb', '🍷'],
   ['apoio', '📦'],
   ['prato', '🍽️'],
+  ['milho', '🌽'],
+  ['petisco', '🥜'],
+  ['bolo', '🎂'],
 ];
 
 export function emojiDaCategoria(categoria: string): string {

@@ -239,6 +239,20 @@
 
 .observacao {
   margin: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.observacao-quantidade {
+  margin: 0;
+  color: var(--cor-verde);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.observacao-descricao {
+  margin: 0;
   color: var(--cor-cinza);
   font-size: 0.85rem;
 }

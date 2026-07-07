@@ -85,7 +85,14 @@
                         <app-badge-status [disponivel]="true" />
                       </div>
                       @if (item.observacao) {
-                        <p class="observacao">{{ item.observacao }}</p>
+                        @if (formatarObservacao(item.observacao); as obs) {
+                          <div class="observacao">
+                            @if (obs.quantidade) {
+                              <p class="observacao-quantidade">{{ obs.quantidade }}</p>
+                            }
+                            <p class="observacao-descricao">{{ obs.descricao }}</p>
+                          </div>
+                        }
                       }
                     </div>
                   </div>
@@ -138,8 +145,15 @@
     <p>Você selecionou o item:</p>
     <div class="item-ja-reservado">
       <strong>{{ itemConfirmado()?.nome }}</strong>
-      @if (itemConfirmado()?.observacao) {
-        <p class="observacao">{{ itemConfirmado()?.observacao }}</p>
+      @if (itemConfirmado()?.observacao; as observacao) {
+        @if (formatarObservacao(observacao); as obs) {
+          <div class="observacao">
+            @if (obs.quantidade) {
+              <p class="observacao-quantidade">{{ obs.quantidade }}</p>
+            }
+            <p class="observacao-descricao">{{ obs.descricao }}</p>
+          </div>
+        }
       }
     </div>
   </div>
@@ -174,8 +188,15 @@
         <p>Você já está responsável pelo item abaixo:</p>
         <div class="item-ja-reservado">
           <strong>{{ itemVerificado()?.nome }}</strong>
-          @if (itemVerificado()?.observacao) {
-            <p class="observacao">{{ itemVerificado()?.observacao }}</p>
+          @if (itemVerificado()?.observacao; as observacao) {
+            @if (formatarObservacao(observacao); as obs) {
+              <div class="observacao">
+                @if (obs.quantidade) {
+                  <p class="observacao-quantidade">{{ obs.quantidade }}</p>
+                }
+                <p class="observacao-descricao">{{ obs.descricao }}</p>
+              </div>
+            }
           }
           @if ((itemVerificado()?.participantes)!.length > 1) {
             <p class="grupo-pessoas">👥 Grupo: {{ (itemVerificado()?.participantes)!.join(', ') }}</p>

@@ -57,6 +57,9 @@ export class ReservaComponent implements OnInit {
   protected readonly itemConfirmado = signal<ItemDetalhe | null>(null);
   protected readonly mostrarModalSucesso = signal(false);
 
+  // Modal de conflito: outra pessoa assumiu o item enquanto o formulário estava aberto.
+  protected readonly mostrarModalItemEsgotado = signal(false);
+
   // Modal "Já escolhi algo?": consulta pontual, sem gate na tela principal.
   protected readonly mostrarModalVerificar = signal(false);
   protected readonly participanteVerificacaoId = signal<number | null>(null);
@@ -183,25 +186,32 @@ export class ReservaComponent implements OnInit {
       this.itemConfirmado.set({ nome: item.nome, observacao: item.observacao });
       this.mostrarModalSucesso.set(true);
       this.fecharModalReserva();
+      await this.carregarDados();
     } catch (erro) {
       const mensagem = this.extrairMensagemErro(erro);
       if (mensagem.includes('esgotado')) {
-        this.toast.erro('😅 Esse item já foi escolhido por outra pessoa. Escolha outro.');
         this.fecharModalReserva();
+        this.mostrarModalItemEsgotado.set(true);
       } else if (mensagem.toLowerCase().includes('ja reservou') || mensagem.toLowerCase().includes('já reservou')) {
         this.toast.erro(mensagem);
+        await this.carregarDados();
       } else {
         this.toast.erro('Não foi possível confirmar a reserva. Tente novamente.');
+        await this.carregarDados();
       }
     } finally {
       this.confirmando.set(false);
-      await this.carregarDados();
     }
   }
 
   protected fecharModalSucesso(): void {
     this.mostrarModalSucesso.set(false);
     this.itemConfirmado.set(null);
+  }
+
+  protected async fecharModalItemEsgotado(): Promise<void> {
+    this.mostrarModalItemEsgotado.set(false);
+    await this.carregarDados();
   }
 
   // O erro do Supabase (PostgrestError) é um objeto plano com `.message`,

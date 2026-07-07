@@ -146,6 +146,13 @@
   <button modal-rodape type="button" class="botao-primario" (click)="fecharModalSucesso()">Entendi</button>
 </app-modal>
 
+<app-modal [visivel]="mostrarModalItemEsgotado()" titulo="😅 Ops!" (fechar)="fecharModalItemEsgotado()">
+  <div modal-corpo>
+    <p>Esse item já foi escolhido por outra pessoa enquanto você preenchia o formulário. Escolha outro item.</p>
+  </div>
+  <button modal-rodape type="button" class="botao-primario" (click)="fecharModalItemEsgotado()">Fechar</button>
+</app-modal>
+
 <app-modal [visivel]="mostrarModalVerificar()" titulo="🔍 Já escolhi algo?" (fechar)="fecharModalVerificar()">
   <div modal-corpo>
     <label for="participante-verificar">Selecione seu nome:</label>
